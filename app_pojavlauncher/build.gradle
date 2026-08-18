@@ -65,29 +65,23 @@ android {
             keyAlias "androiddebugkey"
             keyPassword "android"
         }
-        googlePlayBuild {
-            storeFile file("mojo_upload_next.jks")
-            storePassword System.getenv("UPLOAD_KEYSTORE_PASSWORD")
-            keyAlias "key0"
-            keyPassword System.getenv("UPLOAD_KEYSTORE_PASSWORD")
-        }
-        publicBuild {
-            storeFile file("mojo_release_next.jks")
-            storePassword System.getenv("MOJOPUB_KEYSTORE_PASSWORD")
-            keyAlias "key0"
-            keyPassword System.getenv("MOJOPUB_KEYSTORE_PASSWORD")
+        lunoRelease {
+            storeFile file("luno_release.jks")
+            storePassword System.getenv("LUNO_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("LUNO_KEY_ALIAS")
+            keyPassword System.getenv("LUNO_KEY_PASSWORD")
         }
     }
 
     defaultConfig {
-        applicationId "git.artdeell.mjlaunch"
+        applicationId "dev.sparkynox.lunoclient"
         minSdkVersion 21
         targetSdkVersion 36
         versionCode getDateSeconds()
         versionName getVersionName()
         multiDexEnabled false //important
         resValue 'string', 'curseforge_api_key', getCFApiKey()
-        resValue 'string', 'group_id', 'git.artdeell'
+        resValue 'string', 'group_id', 'dev.sparkynox'
     }
 
     flavorDimensions  = ["runtime"]
@@ -95,11 +89,13 @@ android {
     productFlavors {
         full {
             dimension "runtime"
+            missingDimensionStrategy "runtime", "full"
         }
         
         noruntime {
             dimension "runtime"
             versionNameSuffix "-noruntime"
+            missingDimensionStrategy "runtime", "noruntime"
         }
     }
 
@@ -110,8 +106,8 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.customDebug
-            resValue 'string', 'application_package', 'git.artdeell.mjlaunch.debug'
-            resValue 'string', 'storageProviderAuthorities', 'git.artdeell.mjlaunch.scoped.gamefolder.debug'
+            resValue 'string', 'application_package', 'dev.sparkynox.lunoclient.debug'
+            resValue 'string', 'storageProviderAuthorities', 'dev.sparkynox.lunoclient.scoped.gamefolder.debug'
         }
         proguard {
             initWith debug
@@ -131,18 +127,9 @@ android {
             // defaultConfig already set
             // multiDexEnabled = true
             // debuggable = true
-            resValue 'string', 'storageProviderAuthorities', 'git.artdeell.mjlaunch.scoped.gamefolder'
-            resValue 'string', 'application_package', 'git.artdeell.mjlaunch'
-        }
-        gplay {
-            initWith release
-            signingConfig signingConfigs.googlePlayBuild
-            matchingFallbacks += List.of("release")
-        }
-        pubRelease {
-            initWith release
-            signingConfig signingConfigs.publicBuild
-            matchingFallbacks += List.of("release")
+            signingConfig signingConfigs.lunoRelease
+            resValue 'string', 'storageProviderAuthorities', 'dev.sparkynox.lunoclient.scoped.gamefolder'
+            resValue 'string', 'application_package', 'dev.sparkynox.lunoclient'
         }
     }
 
