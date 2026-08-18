@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/luno_tos_bg"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66FFFFFF" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Terms of Service"
+            android:textColor="#3A1A2C"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Please read before continuing"
+            android:textColor="#6D4C57"
+            android:textSize="13sp"
+            android:layout_marginBottom="14dp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#CCFFFFFF"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/luno_tos_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#2B2029"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
+
+        </ScrollView>
+
+        <CheckBox
+            android:id="@+id/luno_tos_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="I have read and agree to the Terms of Service"
+            android:textColor="#3A1A2C" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="14dp">
+
+            <Button
+                android:id="@+id/luno_tos_decline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Decline" />
+
+            <Button
+                android:id="@+id/luno_tos_accept"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:enabled="false"
+                android:text="Accept &amp; Continue" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

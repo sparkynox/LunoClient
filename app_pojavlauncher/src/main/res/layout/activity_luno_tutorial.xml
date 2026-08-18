@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A0F26">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="360dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/luno_char_tutorial"
+        android:adjustViewBounds="true"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:padding="28dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Start"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="1. Pick or download a Minecraft version from the version list.\n2. Set up your controls, renderer, and RAM allocation in Settings.\n3. Tap Play to launch. You can install Forge/Fabric mods via .jar installers.\n4. Manage instances, modpacks, and skins right from the home screen."
+            android:textColor="#CFC2E8"
+            android:textSize="14sp"
+            android:lineSpacingExtra="6dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/luno_tutorial_finish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="20dp"
+        android:text="Get Started" />
+
+</FrameLayout>
