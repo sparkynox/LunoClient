@@ -1,4 +1,4 @@
-name: Android CI
+name: LunoClient CI
 
 on:
   push:
@@ -10,9 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     env:
-      UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_NEXT_KEYSTORE_PASSWORD }}
-      MOJOPUB_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_NEXT_KEYSTORE_PASSWORD }}
       CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+      LUNO_KEYSTORE_PASSWORD: ${{ secrets.LUNO_KEYSTORE_PASSWORD }}
+      LUNO_KEY_ALIAS: ${{ secrets.LUNO_KEY_ALIAS }}
+      LUNO_KEY_PASSWORD: ${{ secrets.LUNO_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,7 +31,7 @@ jobs:
           path: app_pojavlauncher/libs
 
       - name: Get Mesa
-        uses: dawidd6/action-download-artifact@v6  
+        uses: dawidd6/action-download-artifact@v6
         continue-on-error: true
         with:
           github_token: ${{ secrets.MESA_ACTIONS }}
@@ -41,6 +42,10 @@ jobs:
           name: mesa-aar
           path: app_pojavlauncher/libs
 
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.LUNO_KEYSTORE_BASE64 }}" | base64 -d > app_pojavlauncher/luno_release.jks
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.14.3"
@@ -50,72 +55,50 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
       - name: Create out directory
         run: mkdir out
-      - name: Build Publishing .aab
-        if: github.repository_owner == 'MojoLauncher' && github.ref_name == 'v3_openjdk'
-        run: |
-          gradle :app_pojavlauncher:bundleFullGplay
-          mv app_pojavlauncher/build/outputs/bundle/fullGplay/app_pojavlauncher-full-gplay.aab out/app-gplay.aab
 
-      - name: Build Debug .apk
+      - name: Diagnose glfw:jni_bindings
         run: |
-          # Build the launcher
-          gradle :app_pojavlauncher:assembleFullDebug
-          mv app_pojavlauncher/build/outputs/apk/full/debug/app_pojavlauncher-full-debug.apk out/app-debug-full.apk
+          gradle :glfw:jni_bindings:tasks --stacktrace --info --warning-mode all > glfw_diag.log 2>&1 || true
+          echo "===TASKS DONE, NOW TRYING ASSEMBLE===" >> glfw_diag.log
+          gradle :glfw:jni_bindings:assembleRelease --stacktrace --info >> glfw_diag.log 2>&1 || true
+          tail -150 glfw_diag.log
 
-      - name: Build Debug .apk (No runtime)
+      - name: Upload diagnostic log
+        uses: actions/upload-artifact@v4
+        with:
+          name: glfw-diag-log
+          path: glfw_diag.log
+
+      - name: Build Release APK
         run: |
-          gradle :app_pojavlauncher:assembleNoruntimeDebug
-          mv app_pojavlauncher/build/outputs/apk/noruntime/debug/app_pojavlauncher-noruntime-debug.apk out/app-debug-noruntime.apk
-      - name: Build Nightly Release .apk
-        if: github.repository_owner == 'MojoLauncher' && github.ref_name == 'v3_openjdk'
+          gradle :app_pojavlauncher:assembleFullRelease --stacktrace
+          mv app_pojavlauncher/build/outputs/apk/full/release/app_pojavlauncher-full-release.apk out/LunoClient-release-full.apk
+
+      - name: Build Release APK (No runtime)
         run: |
-          gradle :app_pojavlauncher:assembleFullPubRelease
-          mv app_pojavlauncher/build/outputs/apk/full/pubRelease/app_pojavlauncher-full-pubRelease.apk out/MojoLauncher-release.apk
+          gradle :app_pojavlauncher:assembleNoruntimeRelease
+          mv app_pojavlauncher/build/outputs/apk/noruntime/release/app_pojavlauncher-noruntime-release.apk out/LunoClient-release-noruntime.apk
+
       - name: Gen md5sums
         run: |
-          md5sum out/app-debug-full.apk > out/app-debug-full.md5
-          md5sum out/app-debug-noruntime.apk > out/app-debug-noruntime.md5
+          md5sum out/LunoClient-release-full.apk > out/LunoClient-release-full.md5
+          md5sum out/LunoClient-release-noruntime.apk > out/LunoClient-release-noruntime.md5
 
-      - name: Upload Debug APK
+      - name: Clean up keystore
+        if: always()
+        run: rm -f app_pojavlauncher/luno_release.jks
+
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: out/app-debug-full.apk
+          name: LunoClient-release
+          path: out/LunoClient-release-full.apk
 
-      - name: Upload Debug APK (No runtime)
+      - name: Upload Release APK (No runtime)
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-noruntime
-          path: out/app-debug-noruntime.apk
-
-      - name: Release Nightly APK
-        if: github.repository_owner == 'MojoLauncher' && github.ref_name == 'v3_openjdk'
-        uses: softprops/action-gh-release@v3
-        with:
-          name: MojoLauncher Nightly Builds
-          prerelease: true
-          tag_name: nightly
-          body: |
-            MojoLauncher nightly build.
-            Commit hash: ${{ github.sha }}
-          files: |
-            out/MojoLauncher-release.apk
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-aab
-          path: out/app-gplay.aab
-
-      - name: Upload onto the Google Play testing track
-        continue-on-error: true
-        if: github.repository_owner == 'MojoLauncher' && github.ref_name == 'v3_openjdk'
-        uses: r0adkll/upload-google-play@v1.1.5
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_JSON }}
-          packageName: git.artdeell.mjlaunch
-          releaseFiles: out/app-gplay.aab
-          track: internal
-          inAppUpdatePriority: 5
+          name: LunoClient-release-noruntime
+          path: out/LunoClient-release-noruntime.apk
