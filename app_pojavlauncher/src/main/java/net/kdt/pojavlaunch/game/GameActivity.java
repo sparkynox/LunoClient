@@ -234,7 +234,7 @@ public class GameActivity extends BaseActivity implements ControlButtonMenuListe
             String version = extras.getString(INTENT_LAUNCH_VERSION);
             File[] classpath = (File[]) extras.getSerializable(INTENT_LAUNCH_CLASSPATH);
 
-            setTitle("MojoLauncher (" + version + ")");
+            setTitle("LunoClient (" + version + ")");
 
             // Menu
             gameActionArrayAdapter = new ArrayAdapter<>(this,
